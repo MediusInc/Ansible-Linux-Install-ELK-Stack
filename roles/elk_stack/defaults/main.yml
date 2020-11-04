@@ -19,6 +19,7 @@ replicas: 0
 server_ip: localhost
 shards: 1
 template_dir: /etc/logstash/templates
+beats_on_elk: true
 
 #SSL Settings
 cert_ca_chain_name: "elk.csr"

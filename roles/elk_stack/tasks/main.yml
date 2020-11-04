@@ -20,6 +20,7 @@
   when: inventory_hostname in groups['Kibana']
 
 - include: configure_beats.yaml
+  when: beats_on_elk|bool
 
 - include: configure_logstash.yaml
   when: inventory_hostname in groups['Logstash']
