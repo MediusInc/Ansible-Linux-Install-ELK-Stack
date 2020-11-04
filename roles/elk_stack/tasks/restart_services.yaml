@@ -14,6 +14,15 @@
     name: "{{ item }}"
     state: restarted
   loop:
-    - "kibana"
     - "logstash"
+  when: inventory_hostname in groups['Logstash']
+  changed_when: false
+
+- name: restart_services | Restarting the Rest of the Services
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - "kibana"
+  when: inventory_hostname in groups['Kibana']
   changed_when: false
