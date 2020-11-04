@@ -7,12 +7,19 @@
     mode: 0644
     owner: root
     group: elasticsearch
-    line: '{{ item }}'
+    # FIXME: this interprets the key as a regex, which is not correct
+    regexp: '^{{ item.key }}: .*'
+    line: '{{ item.key }}: {{ item.value }}'
   loop:
-    - 'network.host: "{{ server_ip }}"'
-    - 'http.port: {{ elastic_port }}'
-    - 'xpack.license.self_generated.type: basic'
-    - 'cluster.initial_master_nodes: {{ server_ip }}'
+    - { key: 'network.host'                     , value: '"{{ inventory_hostname }}"' }
+    - { key: 'http.port'                        , value: '{{ elastic_port }}' }
+    - { key: 'xpack.license.self_generated.type', value: 'basic' }
+    - { key: 'cluster.initial_master_nodes'     , value: '["{{ cluster_initial_master_nodes | list | join(''", "'') }}"]' }
+    - { key: 'discovery.seed_hosts'             , value: '["{{ cluster_initial_master_nodes | list | join(''", "'') }}"]' }
+    - { key: 'node.master'                      , value: '{{ inventory_hostname in groups[''ElasticsearchMasters''] | lower }}' }
+    - { key: 'node.data'                        , value: '{{ inventory_hostname in groups[''ElasticsearchDataNodes''] | lower }}' }
+    - { key: 'node.ingest'                      , value: '{{ inventory_hostname in groups[''ElasticsearchDataNodes''] | lower }}' }
+    - { key: 'network.bind_host'                , value: '0.0.0.0' }
 
 - name: configure_elastic | Configure SSL For Elasticsearch (if SSL True)
   lineinfile:

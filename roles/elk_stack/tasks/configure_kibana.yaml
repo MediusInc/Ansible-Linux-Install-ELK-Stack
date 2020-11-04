@@ -7,16 +7,18 @@
     mode: 0644
     owner: root
     group: root
-    line: '{{ item }}'
+    regexp: '^{{ item.key }}: .*'
+    line: '{{ item.key }}: {{ item.value }}'
   loop:
-    - 'server.host: "{{ server_ip }}"'
-    - 'server.port: {{ kibana_port }}'
+    - { key: 'server.host', value: '{{ inventory_hostname }}' }
+    - { key: 'server.port', value: '{{ kibana_port }}' }
 
 - name: configure_kibana | Configure Elastic URL
   lineinfile:
     path: "{{ kibana_conf }}"
     state: present
-    line: 'elasticsearch.hosts: ["http://{{ server_ip }}:{{ elastic_port}}"]'
+    regex: '^elasticsearch.hosts: .*$'
+    line: 'elasticsearch.hosts: ["{{ cluster_initial_master_nodes | map(''regex_replace'', ''^(.*)$'', ''http://\1:9200'') | list | join(''", "'') }}"]'
   when: not ssl_on|bool
 
 - name: configure_kibana | Configure SSL For Kibana (if SSL True)
